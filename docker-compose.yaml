@@ -1,0 +1,51 @@
+version: "3.7"
+services:
+  front-envoy:
+    build:
+      context: .
+      dockerfile: Dockerfile-envoy
+    networks:
+      - envoymesh
+    expose:
+      - "8000"
+      - "8080"
+      - "8081"
+    ports:
+      - "3000:8080"
+      - "8081:8081"
+    depends_on:
+      - dog-service
+      - cat-service
+
+  dog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+      args:
+        - servicePath=./service1/
+    expose:
+        - "8000"
+    networks:
+      envoymesh:
+        aliases:
+          - service1
+    environment: 
+      - ServiceId=1
+
+  cat-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+      args:
+        - servicePath=./service2/
+    expose:
+        - "8000"
+    networks:
+      envoymesh:
+        aliases:
+          - service2
+    environment: 
+      - ServiceId=2
+
+networks:
+  envoymesh: {}

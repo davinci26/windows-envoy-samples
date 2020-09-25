@@ -1,0 +1,25 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+ARG servicePath
+
+# Setup Python
+COPY ./setup_python.ps1 /
+
+RUN powershell.exe .\\setup_python.ps1
+RUN pip3 install -q Flask==0.11.1
+
+# Copy local files for flask server
+
+RUN powershell -Command mkdir service/
+ADD ${servicePath} service/
+
+# Copy envoy and its configuration
+RUN powershell -Command mkdir envoy-config/
+ADD ./envoy-service-config.yaml ./envoy-config/envoy-service-config.yaml
+ADD ./envoy-static.exe ./envoy-static.exe
+
+# Create a log folder to store the stats
+RUN powershell -Command mkdir logs/
+
+ADD ./service_entrypoint.ps1 ./
+ENTRYPOINT powershell ./service_entrypoint.ps1

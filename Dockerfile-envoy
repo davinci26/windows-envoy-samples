@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+# Copy envoy and its configuration
+RUN powershell -Command mkdir envoy-config/
+ADD ./envoy-frontend.yaml ./envoy-config/envoy-frontend.yaml
+ADD ./envoy-static.exe ./envoy-static.exe
+
+# Create a log folder to store the stats
+RUN powershell -Command mkdir logs/
+
+ENTRYPOINT ["envoy-static.exe", "-c", "./envoy-config/envoy-frontend.yaml", "--service-cluster", "front-envoy"]
